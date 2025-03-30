@@ -1,7 +1,9 @@
 ![Bullets.vim](img/bullets-vim-logo.svg)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 > :information_source: Looking for help/maintainers https://github.com/dkarter/bullets.vim/issues/126
@@ -23,6 +25,7 @@ Renumbering lines:
 # Installation
 
 ### With Vim 8.1+ native package manager:
+
 Clone into
 
 `.vim/pack/plugins/start`
@@ -36,7 +39,6 @@ Plug 'bullets-vim/bullets.vim'
 ```
 
 Then source your bundle file and run `:PlugInstall`.
-
 
 # Usage
 
@@ -198,18 +200,6 @@ let g:bullets_renumber_on_change = 1 " default = 1
 " 2. second existing bullet [ use <cr>/o to add a new bullet below this ]
 " 3. new bullet
 " 4. third existing bullet [ this got renumbered 3 -> 2 when bullet 2 got demoted ]
-
-let g:bullets_renumber_on_change = 0
-" Example:
-" 1. first existing bullet
-"   a. second existing bullet [ hit <C-t> ]
-" 3. third existing bullet [ no renumbering so this bullet remained `3` ]
-"
-" Example 2:
-" 1. first existing bullet
-" 2. second existing bullet [ use <cr>/o to add a new bullet below this ]
-" 3. new bullet
-" 3. third existing bullet [ no renumbering so this bullet remained `3` ]
 ```
 
 Enable/disable toggling parent and child checkboxes to indicate "completion" of child checkboxes:
@@ -280,22 +270,59 @@ let g:bullets_checkbox_partials_toggle = 0
 "   - [ ] sub bullet
 ```
 
+Enable/disable automatic duplication of markdown headings when pressing Enter at the end of a heading line:
+
+```vim
+let g:bullets_enable_md_heading_copy = 1 " default = 1
+" Example:
+" ## Heading 2 [cursor here, press Enter]
+" ## Heading 2
+" ## [cursor moves here]
+"
+" ### Subheading [cursor here, press Enter]
+" ### Subheading
+" ### [cursor moves here]
+```
+
+Enable/disable special behavior for Tab and Shift-Tab keys:
+
+```vim
+let g:bullets_enable_tab_mapping = 1 " default = 1
+" For bullet list items (lines starting with -, *, +, or checkbox variants):
+" - Tab: adds two spaces at the beginning to indent the bullet
+" - Shift-Tab: removes two spaces from the beginning if present
+"
+" For Markdown headings (lines starting with one or more # characters):
+" - Tab: adds one more # at the beginning to increase heading level
+" - Shift-Tab: removes one # if there are at least two
+"
+" This feature preserves the cursor's relative position to the content.
+"
+" Example for bullet list:
+" - List item [cursor here] -> press Tab ->
+"   - List item [cursor here]
+"
+" Example for Markdown heading:
+" ## Heading [cursor here] -> press Tab ->
+" ### Heading [cursor here]
+```
+
 # Mappings
 
-* Insert new bullet in INSERT mode: `<cr>` (Return key)
-* Same as <cr> in case you want to unmap <cr> in INSERT mode (compatibility depends on your terminal emulator): `<C-cr>`
-* Insert new bullet in NORMAL mode: `o`
-* Renumber current visual selection: `gN`
-* Renumber entire bullet list containing the cursor in NORMAL mode: gN
-* Toggle a checkbox in NORMAL mode: `<leader>x`
-* Demote a bullet (indent it, decrease bullet level, and make it a child of the previous bullet):
-  + NORMAL mode: `>>`
-  + INSERT mode: `<C-t>`
-  + VISUAL mode: `>`
-* Promote a bullet (unindent it and increase the bullet level):
-  + NORMAL mode: `<<`
-  + INSERT mode: `<C-d>`
-  + VISUAL mode: `>`
+- Insert new bullet in INSERT mode: `<cr>` (Return key)
+- Same as <cr> in case you want to unmap <cr> in INSERT mode (compatibility depends on your terminal emulator): `<C-cr>`
+- Insert new bullet in NORMAL mode: `o`
+- Renumber current visual selection: `gN`
+- Renumber entire bullet list containing the cursor in NORMAL mode: gN
+- Toggle a checkbox in NORMAL mode: `<leader>x`
+- Demote a bullet (indent it, decrease bullet level, and make it a child of the previous bullet):
+  - NORMAL mode: `>>`
+  - INSERT mode: `<C-t>`
+  - VISUAL mode: `>`
+- Promote a bullet (unindent it and increase the bullet level):
+  - NORMAL mode: `<<`
+  - INSERT mode: `<C-d>`
+  - VISUAL mode: `>`
 
 Disable default mappings:
 
@@ -351,11 +378,11 @@ Capybara integration testing. ❤️
 - [x] reset numbers (user selects numbered bullets 3-5 and copies to middle of document, then reselects and resets them to 1-3)
 - [x] check if plugin initialized and don't load if it did
 - [x] allow <C-cr> for return without creating a bullet (only possible in GuiVim
-  unfortunately)
+      unfortunately)
 - [x] check if user is at EOL before appending auto-bullet - they may just want to
 - [x] attempt to keep the same total bullet width even as number width varies (right padding)
 - [x] detect lists that have multiline bullets (should have no empty lines between
-  lines).
+      lines).
 - [x] add alphabetic list
 - [x] support for intelligent alphanumeric indented bullets e.g. 1. \t a. \t 1.
 - [x] change nested outline levels in visual mode

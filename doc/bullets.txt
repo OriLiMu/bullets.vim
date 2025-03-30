@@ -127,6 +127,44 @@ bullets.vim is disabled in new empty buffers by default (buffers created with
   `let g:bullets_enable_in_empty_buffers = 1`
 
 
+Tab and Shift-Tab Functionality
+------------------------------
+In Markdown files or files with bullet lists, the plugin provides special behavior
+for Tab and Shift-Tab keys in insert mode:
+
+For bullet list items (lines starting with `-`, `*`, `+`, or checkbox variants):
+- Tab: adds two spaces at the beginning of the line to indent the bullet
+- Shift-Tab: removes two spaces from the beginning of the line if present
+
+For Markdown headings (lines starting with one or more `#` characters):
+- Tab: adds one more `#` at the beginning to increase heading level
+- Shift-Tab: removes one `#` if there are at least two, preserving cursor position
+
+This feature preserves the cursor's relative position to content, maintaining your
+editing flow.
+
+This feature is enabled by default. To disable it, add the following to your .vimrc:
+
+  `let g:bullets_enable_tab_mapping = 0`
+
+
+Markdown Heading Duplication
+---------------------------
+In Markdown files, when pressing <CR> at the end of a line that starts with
+one or more '#' characters (a heading), the plugin will create a new line with
+the same heading level. For example:
+
+  `## Heading` -> press Enter ->
+  ```
+  ## Heading
+  ## 
+  ```
+
+This feature is enabled by default. To disable it, add the following to your .vimrc:
+
+  `let g:bullets_enable_md_heading_copy = 0`
+
+
 Disable mappings
 ----------------
 To disable default mappings add the following to your .vimrc:

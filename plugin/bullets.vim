@@ -32,8 +32,16 @@ if !exists('g:bullets_mapping_leader')
   let g:bullets_mapping_leader = ''
 end
 
+if !exists('g:bullets_enable_md_heading_copy')
+  let g:bullets_enable_md_heading_copy = 1
+end
+
+if !exists('g:bullets_enable_tab_mapping')
+  let g:bullets_enable_tab_mapping = 1
+end
+
 " Extra key mappings in addition to default ones.
-" If you don’t need default mappings set 'g:bullets_set_mappings' to '0'.
+" If you don't need default mappings set 'g:bullets_set_mappings' to '0'.
 " N.B. 'g:bullets_mapping_leader' has no effect on these mappings.
 "
 " Example:
@@ -566,9 +574,23 @@ fun! s:insert_new_bullet()
   let l:normal_mode = mode() ==# 'n'
   let l:indent_next = s:line_ends_in_colon(l:curr_line_num) && g:bullets_auto_indent_after_colon
 
-  " check if current line is a bullet and we are at the end of the line (for
-  " insert mode only)
-  if l:bullet != {} && (l:normal_mode || s:is_at_eol())
+  " Check if current line is a markdown heading (starts with one or more #)
+  let l:curr_line = getline(l:curr_line_num)
+  let l:is_markdown_heading = g:bullets_enable_md_heading_copy && &filetype ==# 'markdown' && l:curr_line =~# '\v^#{1,6}\s'
+  
+  if l:is_markdown_heading && (l:normal_mode || s:is_at_eol())
+    " Extract the heading markers (#, ##, etc.)
+    let l:heading_markers = matchstr(l:curr_line, '\v^#{1,6}')
+    
+    " Create a new heading with the same level
+    call append(l:curr_line_num, l:heading_markers . ' ')
+    
+    " Move cursor to the new line
+    call setpos('.', [0, l:next_line_num, strlen(l:heading_markers) + 2])
+    
+    " Don't send return since we've already added a new line
+    let l:send_return = 0
+  elseif l:bullet != {} && (l:normal_mode || s:is_at_eol())
     " was any text entered after the bullet?
     if l:bullet.text_after_bullet ==# ''
       " We don't want to create a new bullet if the previous one was not used,
@@ -1111,6 +1133,88 @@ inoremap <silent> <Plug>(bullets-promote) <C-o>:BulletPromote<cr>
 nnoremap <silent> <Plug>(bullets-promote) :BulletPromote<cr>
 vnoremap <silent> <Plug>(bullets-promote) :BulletPromoteVisual<cr>
 
+" Tab and Shift-Tab functionality
+inoremap <silent> <Plug>(bullets-tab) <C-R>=<SID>handle_tab_key()<cr>
+inoremap <silent> <Plug>(bullets-shift-tab) <C-R>=<SID>handle_shift_tab_key()<cr>
+
+fun! s:handle_tab_key()
+  let l:lnum = line('.')
+  let l:line = getline(l:lnum)
+  let l:col = col('.')
+  let l:content_col = l:col - 1
+  
+  " 保存当前行中，光标前后的内容
+  let l:before_cursor = strpart(l:line, 0, l:content_col)
+  let l:after_cursor = strpart(l:line, l:content_col)
+  
+  " 处理Markdown标题
+  if &filetype ==# 'markdown' && l:line =~# '\v^#{1,5}\s'
+    " 提取标题标记
+    let l:heading_markers = matchstr(l:line, '\v^#{1,5}')
+    
+    " 在标题前添加一个#号
+    let l:new_line = '#' . l:line
+    call setline(l:lnum, l:new_line)
+    
+    " 移动光标位置（向右移动一个字符）
+    call setpos('.', [0, l:lnum, l:col + 1])
+    
+    return ""
+  " 处理列表项
+  elseif l:line =~# '\v^\s*(-|\*|\+)(\s+|\s*\[[ .oOxX]\]\s+)'
+    " 在行首添加两个空格
+    let l:new_line = '  ' . l:line
+    call setline(l:lnum, l:new_line)
+    
+    " 移动光标位置（向右移动两个字符）
+    call setpos('.', [0, l:lnum, l:col + 2])
+    
+    return ""
+  endif
+  
+  " 如果不是特殊行，则使用默认的Tab行为
+  return "\<Tab>"
+endfun
+
+fun! s:handle_shift_tab_key()
+  let l:lnum = line('.')
+  let l:line = getline(l:lnum)
+  let l:col = col('.')
+  let l:content_col = l:col - 1
+  
+  " 保存当前行中，光标前后的内容
+  let l:before_cursor = strpart(l:line, 0, l:content_col)
+  let l:after_cursor = strpart(l:line, l:content_col)
+  
+  " 处理Markdown标题
+  if &filetype ==# 'markdown' && l:line =~# '\v^#{2,6}\s'
+    " 提取标题标记
+    let l:heading_markers = matchstr(l:line, '\v^#{2,6}')
+    
+    " 移除一个#号
+    let l:new_line = l:line[1:]
+    call setline(l:lnum, l:new_line)
+    
+    " 移动光标位置（向左移动一个字符）
+    call setpos('.', [0, l:lnum, max([1, l:col - 1])])
+    
+    return ""
+  " 处理列表项，如果行首有空格
+  elseif l:line =~# '\v^  \s*(-|\*|\+)(\s+|\s*\[[ .oOxX]\]\s+)'
+    " 移除行首的两个空格
+    let l:new_line = l:line[2:]
+    call setline(l:lnum, l:new_line)
+    
+    " 移动光标位置（向左移动两个字符）
+    call setpos('.', [0, l:lnum, max([1, l:col - 2])])
+    
+    return ""
+  endif
+  
+  " 如果不是特殊行，则使用默认的Shift-Tab行为
+  return "\<S-Tab>"
+endfun
+
 fun! s:add_local_mapping(with_leader, mapping_type, mapping, action)
   let l:file_types = join(g:bullets_enabled_file_types, ',')
   execute 'autocmd FileType ' .
@@ -1159,6 +1263,12 @@ augroup TextBulletsMappings
     call s:add_local_mapping(1, 'imap', '<C-d>', '<Plug>(bullets-promote)')
     call s:add_local_mapping(1, 'nmap', '<<', '<Plug>(bullets-promote)')
     call s:add_local_mapping(1, 'vmap', '<', '<Plug>(bullets-promote)')
+
+    " Tab and Shift-Tab mappings for indentation and heading level adjustment
+    if g:bullets_enable_tab_mapping
+      call s:add_local_mapping(1, 'imap', '<Tab>', '<Plug>(bullets-tab)')
+      call s:add_local_mapping(1, 'imap', '<S-Tab>', '<Plug>(bullets-shift-tab)')
+    endif
   end
 
   for s:custom_key_mapping in g:bullets_custom_mappings
