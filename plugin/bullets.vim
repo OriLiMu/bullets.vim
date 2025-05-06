@@ -574,16 +574,7 @@ fun! s:insert_new_bullet()
   let l:normal_mode = mode() ==# 'n'
   let l:indent_next = s:line_ends_in_colon(l:curr_line_num) && g:bullets_auto_indent_after_colon
 
-  " Check if current line is a markdown heading (starts with one or more #)
-  let l:curr_line = getline(l:curr_line_num)
-  " let l:is_markdown_heading = g:bullets_enable_md_heading_copy && &filetype ==# 'markdown' && l:curr_line =~# '\v^#{1,6}\\s'
-  
-  " if l:is_markdown_heading && (l:normal_mode || s:is_at_eol())
-  "   let l:heading_markers = matchstr(l:curr_line, '\v^#{1,6}')
-  "   call append(l:curr_line_num, l:heading_markers . ' ')
-  "   call setpos('.', [0, l:next_line_num, strlen(l:heading_markers) + 2])
-  "   let l:send_return = 0
-  elseif l:bullet != {} && (l:normal_mode || s:is_at_eol())
+  if l:bullet != {} && (l:normal_mode || s:is_at_eol())
     " was any text entered after the bullet?
     if l:bullet.text_after_bullet ==# ''
       " We don't want to create a new bullet if the previous one was not used,
