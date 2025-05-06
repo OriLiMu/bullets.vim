@@ -576,20 +576,13 @@ fun! s:insert_new_bullet()
 
   " Check if current line is a markdown heading (starts with one or more #)
   let l:curr_line = getline(l:curr_line_num)
-  let l:is_markdown_heading = g:bullets_enable_md_heading_copy && &filetype ==# 'markdown' && l:curr_line =~# '\v^#{1,6}\s'
+  " let l:is_markdown_heading = g:bullets_enable_md_heading_copy && &filetype ==# 'markdown' && l:curr_line =~# '\v^#{1,6}\\s'
   
-  if l:is_markdown_heading && (l:normal_mode || s:is_at_eol())
-    " Extract the heading markers (#, ##, etc.)
-    let l:heading_markers = matchstr(l:curr_line, '\v^#{1,6}')
-    
-    " Create a new heading with the same level
-    call append(l:curr_line_num, l:heading_markers . ' ')
-    
-    " Move cursor to the new line
-    call setpos('.', [0, l:next_line_num, strlen(l:heading_markers) + 2])
-    
-    " Don't send return since we've already added a new line
-    let l:send_return = 0
+  " if l:is_markdown_heading && (l:normal_mode || s:is_at_eol())
+  "   let l:heading_markers = matchstr(l:curr_line, '\v^#{1,6}')
+  "   call append(l:curr_line_num, l:heading_markers . ' ')
+  "   call setpos('.', [0, l:next_line_num, strlen(l:heading_markers) + 2])
+  "   let l:send_return = 0
   elseif l:bullet != {} && (l:normal_mode || s:is_at_eol())
     " was any text entered after the bullet?
     if l:bullet.text_after_bullet ==# ''
